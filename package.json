@@ -1,15 +1,21 @@
 {
-  "name": "23next",
+  "name": "fasterpokemon",
+  "homepage": "https://feripe1.github.io/fasterpokemon",
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
   },
   "dependencies": {
+    "autoprefixer": "^10.4.12",
+    "axios": "^1.1.3",
     "next": "12.3.1",
+    "postcss": "^8.4.18",
     "react": "18.2.0",
     "react-dom": "18.2.0"
   },
@@ -19,6 +25,8 @@
     "@types/react-dom": "18.0.6",
     "eslint": "8.25.0",
     "eslint-config-next": "12.3.1",
+    "gh-pages": "^4.0.0",
+    "tailwindcss": "^3.1.8",
     "typescript": "4.8.4"
   }
 }
