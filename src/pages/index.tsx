@@ -92,11 +92,11 @@ export default function NextPage({ pokeOne, pokeTwo }: bothPokemons) {
   return (
     <>
       <Head>
-        <title>teste</title>
+        <title>Faster pokemon</title>
       </Head>
 
       <div className="flex flex-col items-center justify-center h-screen">
-        <div className="absolute top-52">
+        <div className="absolute top-[23%]">
           <h1 className="text-2xl">Which one is faster?</h1>
           {streak >= 3 && <h1 className="text-2xl">In a {streak} guess streak!!</h1>}
         </div>
@@ -108,6 +108,7 @@ export default function NextPage({ pokeOne, pokeTwo }: bothPokemons) {
                 src={pokeOne.sprites.other['official-artwork'].front_default}
                 width="320px"
                 height="320px"
+                priority
                 alt=""
               />
 
@@ -129,6 +130,7 @@ export default function NextPage({ pokeOne, pokeTwo }: bothPokemons) {
                 src={pokeTwo.sprites.other['official-artwork'].front_default}
                 width="320px"
                 height="320px"
+                priority
                 alt=""
               />
 
@@ -147,14 +149,20 @@ export default function NextPage({ pokeOne, pokeTwo }: bothPokemons) {
           (rightAnswer ? (
             <div className="absolute text-center rounded-md bg-[white] px-10 py-4 text-zinc-900">
               <h2 className="text-xl">right answer</h2>
-              <button onClick={refreshData} className="py-2 px-3 mt-3">
+              <button
+                onClick={refreshData}
+                className="py-2 px-3 mt-3 rounded-md bg-gray-200"
+              >
                 Continue
               </button>
             </div>
           ) : (
             <div className="absolute text-center rounded-md bg-[white] px-10 py-4 text-zinc-900">
               <h2 className="text-xl">wrong answer</h2>
-              <button onClick={refreshData} className="py-2 px-3 mt-3">
+              <button
+                onClick={refreshData}
+                className="py-2 px-3 mt-3 rounded-md bg-gray-200"
+              >
                 Continue
               </button>
             </div>

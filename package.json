@@ -1,11 +1,8 @@
 {
   "name": "fasterpokemon",
-  "homepage": "https://feripe1.github.io/fasterpokemon",
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "predeploy": "npm run build",
-    "deploy": "gh-pages -d build",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
@@ -25,7 +22,6 @@
     "@types/react-dom": "18.0.6",
     "eslint": "8.25.0",
     "eslint-config-next": "12.3.1",
-    "gh-pages": "^4.0.0",
     "tailwindcss": "^3.1.8",
     "typescript": "4.8.4"
   }
