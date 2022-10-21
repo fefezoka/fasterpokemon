@@ -12,6 +12,11 @@ module.exports = {
       animation: {
         fade: 'fade .66s ease',
       },
+      colors: {
+        white: 'var(--white)',
+        green: 'var(--green)',
+        red: 'var(--red)',
+      },
     },
   },
   plugins: [],

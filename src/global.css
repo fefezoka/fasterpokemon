@@ -2,7 +2,15 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --white: rgb(225, 230, 250);
+  --black: rgb(25, 30, 35);
+  --green: rgb(0, 99, 65);
+  --red: rgb(120, 20, 30);
+}
+
 body {
-  background-color: black;
-  color: white;
+  background-color: var(--white);
+  color: var(--black);
+  font-size: 20px;
 }

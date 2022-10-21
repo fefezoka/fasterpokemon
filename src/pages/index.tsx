@@ -62,7 +62,10 @@ export default function NextPage({ pokeOne, pokeTwo }: bothPokemons) {
   }, []);
 
   const whichIsFaster = (chosen: number) => {
-    setGuessed(true);
+    if (guessed) {
+      return;
+    }
+
     if (pokeOne.speed > pokeTwo.speed) {
       if (chosen === 1) {
         onRightAnswer();
@@ -76,6 +79,7 @@ export default function NextPage({ pokeOne, pokeTwo }: bothPokemons) {
         setStreak(0);
       }
     }
+    setGuessed(true);
   };
 
   const onRightAnswer = () => {
@@ -96,8 +100,8 @@ export default function NextPage({ pokeOne, pokeTwo }: bothPokemons) {
       </Head>
 
       <div className="flex flex-col items-center justify-center h-screen">
-        <div className="absolute top-[23%]">
-          <h1 className="text-2xl">Which one is faster?</h1>
+        <div className="absolute top-[20%] text-center">
+          <h1 className="text-3xl">Which one is faster?</h1>
           {streak >= 3 && <h1 className="text-2xl">In a {streak} guess streak!!</h1>}
         </div>
 
@@ -106,16 +110,16 @@ export default function NextPage({ pokeOne, pokeTwo }: bothPokemons) {
             <div className="cursor-pointer" onClick={() => whichIsFaster(1)}>
               <Image
                 src={pokeOne.sprites.other['official-artwork'].front_default}
-                width="320px"
-                height="320px"
-                priority
+                width="260px"
+                height="260px"
+                loading="eager"
                 alt=""
               />
 
               <div className="text-center">
-                <span>{pokeOne.name}</span>
+                <span className="capitalize">{pokeOne.name}</span>
                 <div>
-                  base speed: {guessed ? <span>{pokeOne.speed}</span> : <span>??</span>}
+                  Base speed: {guessed ? <span>{pokeOne.speed}</span> : <span>??</span>}
                 </div>
               </div>
             </div>
@@ -128,16 +132,16 @@ export default function NextPage({ pokeOne, pokeTwo }: bothPokemons) {
             <div className="cursor-pointer" onClick={() => whichIsFaster(2)}>
               <Image
                 src={pokeTwo.sprites.other['official-artwork'].front_default}
-                width="320px"
-                height="320px"
-                priority
+                width="260px"
+                height="260px"
+                loading="eager"
                 alt=""
               />
 
               <div className="text-center">
-                <span>{pokeTwo.name}</span>
+                <span className="capitalize">{pokeTwo.name}</span>
                 <div>
-                  base speed: {guessed ? <span>{pokeTwo.speed}</span> : <span>??</span>}
+                  Base speed: {guessed ? <span>{pokeTwo.speed}</span> : <span>??</span>}
                 </div>
               </div>
             </div>
@@ -147,22 +151,16 @@ export default function NextPage({ pokeOne, pokeTwo }: bothPokemons) {
         </div>
         {guessed &&
           (rightAnswer ? (
-            <div className="absolute text-center rounded-md bg-[white] px-10 py-4 text-zinc-900">
-              <h2 className="text-xl">right answer</h2>
-              <button
-                onClick={refreshData}
-                className="py-2 px-3 mt-3 rounded-md bg-gray-200"
-              >
+            <div className="absolute text-center rounded-md bg-green px-8 py-3 text-white">
+              <h2 className="text-xl">Right answer</h2>
+              <button onClick={refreshData} className="py-2 px-3 mt-3 rounded-md">
                 Continue
               </button>
             </div>
           ) : (
-            <div className="absolute text-center rounded-md bg-[white] px-10 py-4 text-zinc-900">
-              <h2 className="text-xl">wrong answer</h2>
-              <button
-                onClick={refreshData}
-                className="py-2 px-3 mt-3 rounded-md bg-gray-200"
-              >
+            <div className="absolute text-center rounded-md bg-red px-8 py-3 text-white">
+              <h2 className="text-xl">Wrong answer</h2>
+              <button onClick={refreshData} className="py-2 px-3 mt-3 rounded-md">
                 Continue
               </button>
             </div>
