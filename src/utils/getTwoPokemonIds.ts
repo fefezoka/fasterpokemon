@@ -1,6 +1,6 @@
 import { api } from '../services/api';
 
-const MAX_POKEMON_ID = 151;
+const MAX_POKEMON_ID = 900;
 
 const getRandomPokemon: (idToCompare?: number) => number = (idToCompare) => {
   const id = Math.floor(Math.random() * MAX_POKEMON_ID) + 1;
