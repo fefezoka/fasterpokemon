@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 :root {
-  --white: rgb(225, 230, 250);
+  --white: rgb(213, 223, 255);
   --black: rgb(25, 30, 35);
   --green: rgb(0, 99, 65);
   --red: rgb(120, 20, 30);

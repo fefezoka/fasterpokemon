@@ -1,72 +1,56 @@
+import { useState } from 'react';
 import type { GetServerSideProps, NextPage } from 'next';
 import Head from 'next/head';
 import Image from 'next/image';
-import Router from 'next/router';
-import { useState, useEffect } from 'react';
-import { api } from '../services/api';
-import { getTwoPokemonIds } from '../utils/getTwoPokemonIds';
 import Spinner from '../../public/Spinner.svg';
+import { signIn, getSession, signOut } from 'next-auth/react';
+import { Session } from 'next-auth';
+import axios from 'axios';
+import { useLoadOptions } from '../hooks/useLoadOptions';
+import { prisma } from '../lib/prisma';
+import { User } from '@prisma/client';
+import { BsX } from 'react-icons/bs';
 
-interface pokemon {
-  id: number;
-  name: string;
-  sprites: {
-    other: {
-      ['official-artwork']: {
-        front_default: string;
-      };
-    };
-  };
-  speed: number;
+interface Props {
+  session: Session;
+  ranking: User[];
 }
 
-interface bothPokemons {
-  pokeOne: pokemon;
-  pokeTwo: pokemon;
-}
+export const getServerSideProps: GetServerSideProps = async ({ req }) => {
+  const session = await getSession({ req });
 
-export const getServerSideProps: GetServerSideProps = async () => {
-  const [idOne, idTwo] = getTwoPokemonIds();
-
-  const { data: pokeOne } = await api(`${idOne}`);
-  const { data: pokeTwo } = await api(`${idTwo}`);
-
-  pokeOne.speed = pokeOne.stats[5].base_stat;
-  pokeTwo.speed = pokeTwo.stats[5].base_stat;
+  const ranking = await prisma.user.findMany({
+    take: 10,
+    orderBy: {
+      wins: 'desc',
+    },
+  });
 
   return {
     props: {
-      pokeOne,
-      pokeTwo,
+      session,
+      ranking,
     },
   };
 };
 
-export default function NextPage({ pokeOne, pokeTwo }: bothPokemons) {
+const NextPage = ({ session, ranking }: Props) => {
   const [rightAnswer, setRightAnswer] = useState<boolean>(false);
   const [guessed, setGuessed] = useState<boolean>(false);
-  const [loading, setLoading] = useState<boolean>(false);
   const [streak, setStreak] = useState<number>(0);
+  const [rankingActive, setRankActive] = useState<boolean>();
+  const { loading, options, setRounds } = useLoadOptions();
 
-  console.log('render');
-
-  pokeOne.speed === pokeTwo.speed && Router.replace(Router.asPath);
-
-  useEffect(() => {
-    Router.events.on('routeChangeStart', () => setLoading(true));
-    Router.events.on('routeChangeComplete', () => setLoading(false));
-    return () => {
-      Router.events.off('routeChangeStart', () => setLoading(true));
-      Router.events.off('routeChangeComplete', () => setLoading(false));
-    };
-  }, []);
+  if (!options) {
+    return;
+  }
 
   const whichIsFaster = (chosen: number) => {
     if (guessed) {
       return;
     }
 
-    if (pokeOne.speed > pokeTwo.speed) {
+    if (options[0].speed > options[1].speed) {
       if (chosen === 1) {
         onRightAnswer();
       } else {
@@ -88,18 +72,49 @@ export default function NextPage({ pokeOne, pokeTwo }: bothPokemons) {
   };
 
   const refreshData = () => {
-    Router.replace(Router.asPath);
+    session && updateUserOnDB();
     setRightAnswer(false);
     setGuessed(false);
+    setRounds((r) => r + 1);
+  };
+
+  const updateUserOnDB = async () => {
+    await axios.post(`/api/user/update`, {
+      ...session.user,
+      rightAnswer,
+      streak,
+    });
   };
 
   return (
     <>
       <Head>
-        <title>Faster pokemon</title>
+        <title>Faster Pokémon</title>
       </Head>
 
-      <div className="flex flex-col items-center justify-center h-screen">
+      <header className="flex w-full items-center justify-center h-20 fixed">
+        <nav>
+          <ul className="flex gap-6 text-center">
+            <li>
+              <button onClick={() => setRankActive(true)}>Ranking</button>
+            </li>
+            {session ? (
+              <>
+                <li>
+                  <p>Logged as {session.user?.name}</p>
+                  <button onClick={() => signOut()}>Sign up</button>
+                </li>
+              </>
+            ) : (
+              <li>
+                <button onClick={() => signIn('github')}>Login with Github</button>
+              </li>
+            )}
+          </ul>
+        </nav>
+      </header>
+
+      <main className="flex flex-col items-center justify-center h-screen">
         <div className="absolute top-[20%] text-center">
           <h1 className="text-3xl">Which one is faster?</h1>
           {streak >= 3 && <h1 className="text-2xl">In a {streak} guess streak!!</h1>}
@@ -109,44 +124,46 @@ export default function NextPage({ pokeOne, pokeTwo }: bothPokemons) {
           {!loading ? (
             <div className="cursor-pointer" onClick={() => whichIsFaster(1)}>
               <Image
-                src={pokeOne.sprites.other['official-artwork'].front_default}
+                src={options[0].sprites.other['official-artwork'].front_default}
                 width="260px"
                 height="260px"
-                loading="eager"
+                priority
                 alt=""
               />
 
               <div className="text-center">
-                <span className="capitalize">{pokeOne.name}</span>
+                <span className="capitalize">{options[0].name}</span>
                 <div>
-                  Base speed: {guessed ? <span>{pokeOne.speed}</span> : <span>??</span>}
+                  Base speed:{' '}
+                  {guessed ? <span>{options[0].speed}</span> : <span>??</span>}
                 </div>
               </div>
             </div>
           ) : (
-            <Image src={Spinner} width="120px" height="120px" alt="" />
+            <Image src={Spinner} priority width="120px" height="120px" alt="" />
           )}
           <span className="text-2xl">or</span>
 
           {!loading ? (
             <div className="cursor-pointer" onClick={() => whichIsFaster(2)}>
               <Image
-                src={pokeTwo.sprites.other['official-artwork'].front_default}
+                src={options[1].sprites.other['official-artwork'].front_default}
                 width="260px"
                 height="260px"
-                loading="eager"
+                priority
                 alt=""
               />
 
               <div className="text-center">
-                <span className="capitalize">{pokeTwo.name}</span>
+                <span className="capitalize">{options[1].name}</span>
                 <div>
-                  Base speed: {guessed ? <span>{pokeTwo.speed}</span> : <span>??</span>}
+                  Base speed:{' '}
+                  {guessed ? <span>{options[1].speed}</span> : <span>??</span>}
                 </div>
               </div>
             </div>
           ) : (
-            <Image src={Spinner} width="120px" height="120px" alt="" />
+            <Image src={Spinner} priority width="120px" height="120px" alt="" />
           )}
         </div>
         {guessed &&
@@ -165,7 +182,39 @@ export default function NextPage({ pokeOne, pokeTwo }: bothPokemons) {
               </button>
             </div>
           ))}
-      </div>
+
+        {rankingActive && (
+          <div className="h-screen w-screen md:w-96 text-base absolute text-center py-4 right-0 bg-indigo-200">
+            <h1 className="pb-2 font-semibold">Ranking</h1>
+            <div
+              onClick={() => setRankActive(false)}
+              className="absolute p-2 right-6 top-1 cursor-pointer"
+            >
+              <BsX size={32}></BsX>
+            </div>
+
+            <ul>
+              {ranking.map((user, index) => (
+                <li
+                  className="flex gap-4 py-9 px-4 items-center max-h-9 border-b border-black"
+                  key={user.id}
+                >
+                  <p>{index + 1}º</p>
+                  <div>
+                    <Image src={user.avatar_url} alt="" width={47} height={47}></Image>
+                  </div>
+                  <p>{user.name}</p>
+                  <p>
+                    {user.wins} wins in {user.totalRounds} rounds
+                  </p>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </main>
     </>
   );
-}
+};
+
+export default NextPage;
