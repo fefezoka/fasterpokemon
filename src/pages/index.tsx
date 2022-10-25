@@ -20,20 +20,15 @@ export const getServerSideProps: GetServerSideProps = async ({ req }) => {
   const session = await getSession({ req });
 
   if (session?.user?.email && session?.user.name && session?.user.image) {
-    const userIsOnDB = await prisma.user.count({
-      where: {
+    await prisma.user.upsert({
+      create: {
         email: session.user.email,
+        name: session.user.name,
+        avatar_url: session.user.image,
       },
+      update: {},
+      where: { email: session.user.email },
     });
-
-    !userIsOnDB &&
-      (await prisma.user.create({
-        data: {
-          name: session.user.name,
-          email: session.user.email,
-          avatar_url: session.user.image,
-        },
-      }));
   }
 
   const ranking = await prisma.user.findMany({
@@ -152,10 +147,12 @@ const NextPage = ({ session, ranking }: Props) => {
                   src={pokemon.sprites.other['official-artwork'].front_default}
                   width="220px"
                   height="220px"
+                  placeholder="blur"
+                  blurDataURL={Spinner}
+                  quality={50}
                   priority
                   alt=""
                 />
-
                 <div className="text-center">
                   <span className="capitalize">{pokemon.name}</span>
                   <div>
@@ -188,9 +185,9 @@ const NextPage = ({ session, ranking }: Props) => {
             <h1 className="pb-2 font-semibold">Ranking</h1>
             <div
               onClick={() => setRankActive(false)}
-              className="absolute p-2 right-6 top-1 cursor-pointer"
+              className="absolute p-1 right-6 top-2 cursor-pointer"
             >
-              <BsX size={32}></BsX>
+              <BsX size={28}></BsX>
             </div>
 
             <ul>
