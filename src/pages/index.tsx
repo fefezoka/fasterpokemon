@@ -27,6 +27,7 @@ export const getServerSideProps: GetServerSideProps = async ({ req }) => {
       name: true,
       wins: true,
       winrate: true,
+      maxStreak: true,
       totalRounds: true,
       avatar_url: true,
       id: true,
@@ -124,7 +125,7 @@ const NextPage = ({ session, ranking }: Props) => {
           {streak >= 3 && <h1 className="text-2xl">In a {streak} guess streak!!</h1>}
         </div>
 
-        <div className="flex w-full justify-center gap-12 items-center lg:w-5/12">
+        <div className="flex w-full justify-evenly gap-12 items-center lg:w-1/3">
           {options.map((pokemon, index) =>
             !loading ? (
               <div
@@ -180,21 +181,24 @@ const NextPage = ({ session, ranking }: Props) => {
             <ul>
               {ranking.map((user, index) => (
                 <li
-                  className="flex gap-4 py-9 px-4 items-center max-h-9 border-b border-bg"
+                  className="flex gap-4 py-9 px-4 items-center justify-between max-h-9 border-b border-white"
                   key={user.id}
                 >
-                  <p>{index + 1}º</p>
-                  <div>
-                    <Image src={user.avatar_url} alt="" width={47} height={47}></Image>
+                  <div className="flex items-center gap-3 min-w-[60%]">
+                    <p>{index + 1}º</p>
+                    <div className="border-2 border-white w-12 h-12">
+                      <Image src={user.avatar_url} alt="" height={48} width={48}></Image>
+                    </div>
+                    <div className="text-left">
+                      <p>{user.name}</p>
+                    </div>
                   </div>
-                  <div className="text-left min-w-[100px]">
-                    <p>{user.name}</p>
-                  </div>
-                  <div className="text-left">
+                  <div className="text-left min-w-[40%]">
                     <p>
                       {user.wins} wins in {user.totalRounds} rounds
                     </p>
                     <p>Winrate: {user.winrate.toFixed(1)}%</p>
+                    <p>Max streak: {user.maxStreak}</p>
                   </div>
                 </li>
               ))}
