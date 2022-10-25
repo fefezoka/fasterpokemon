@@ -15,8 +15,8 @@ model User {
   name String
   email String @unique
   avatar_url String
-  totalRounds Int
-  wins Int
+  totalRounds Int @default(0)
+  wins Int @default(0)
   winrate Float @default(0)
-  maxStreak Int
+  maxStreak Int @default(0)
 }

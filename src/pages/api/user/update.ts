@@ -2,7 +2,7 @@ import { prisma } from '../../../lib/prisma';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 export default async function update(req: NextApiRequest, res: NextApiResponse) {
-  const { email, name, image, rightAnswer, streak } = req.body;
+  const { email, rightAnswer, streak } = req.body;
 
   const user = await prisma.user.findUnique({
     select: {
@@ -15,17 +15,12 @@ export default async function update(req: NextApiRequest, res: NextApiResponse) 
     },
   });
 
-  await prisma.user.upsert({
-    create: {
-      email: email,
-      name: name,
-      avatar_url: image,
-      wins: rightAnswer ? 1 : 0,
-      maxStreak: streak,
-      winrate: 0,
-      totalRounds: 1,
-    },
-    update: {
+  if (!user) {
+    return res.status(500).json({});
+  }
+
+  await prisma.user.update({
+    data: {
       wins: {
         increment: rightAnswer ? 1 : 0,
       },
@@ -33,10 +28,10 @@ export default async function update(req: NextApiRequest, res: NextApiResponse) 
         increment: 1,
       },
       maxStreak: {
-        set: user?.maxStreak ? (streak > user.maxStreak ? streak : user?.maxStreak) : 0,
+        set: streak > user.maxStreak ? streak : user?.maxStreak,
       },
       winrate: {
-        set: user?.wins ? ((user.wins + rightAnswer) / (user.totalRounds + 1)) * 100 : 0,
+        set: ((user.wins + rightAnswer) / (user.totalRounds + 1)) * 100,
       },
     },
     where: {

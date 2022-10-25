@@ -19,7 +19,22 @@ interface Props {
 export const getServerSideProps: GetServerSideProps = async ({ req }) => {
   const session = await getSession({ req });
 
-  console.log(session);
+  if (session?.user?.email && session?.user.name && session?.user.image) {
+    const userIsOnDB = await prisma.user.count({
+      where: {
+        email: session.user.email,
+      },
+    });
+
+    !userIsOnDB &&
+      (await prisma.user.create({
+        data: {
+          name: session.user.name,
+          email: session.user.email,
+          avatar_url: session.user.image,
+        },
+      }));
+  }
 
   const ranking = await prisma.user.findMany({
     take: 10,
