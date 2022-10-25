@@ -6,6 +6,8 @@ export default async function update(req: NextApiRequest, res: NextApiResponse) 
 
   const user = await prisma.user.findUnique({
     select: {
+      wins: true,
+      totalRounds: true,
       maxStreak: true,
     },
     where: {
@@ -24,6 +26,9 @@ export default async function update(req: NextApiRequest, res: NextApiResponse) 
       maxStreak: {
         set: user?.maxStreak ? (streak > user.maxStreak ? streak : user?.maxStreak) : 0,
       },
+      winrate: {
+        set: ((user!.wins + rightAnswer) / (user!.totalRounds + 1)) * 100,
+      },
     },
     where: {
       email: email,
@@ -34,6 +39,7 @@ export default async function update(req: NextApiRequest, res: NextApiResponse) 
       avatar_url: image,
       wins: rightAnswer ? 1 : 0,
       maxStreak: streak,
+      winrate: 0,
       totalRounds: 1,
     },
   });

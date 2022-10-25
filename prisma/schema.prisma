@@ -17,5 +17,6 @@ model User {
   avatar_url String
   totalRounds Int
   wins Int
+  winrate Float @default(0)
   maxStreak Int
 }

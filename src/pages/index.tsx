@@ -19,10 +19,20 @@ interface Props {
 export const getServerSideProps: GetServerSideProps = async ({ req }) => {
   const session = await getSession({ req });
 
+  console.log(session);
+
   const ranking = await prisma.user.findMany({
     take: 10,
+    select: {
+      name: true,
+      wins: true,
+      winrate: true,
+      totalRounds: true,
+      avatar_url: true,
+      id: true,
+    },
     orderBy: {
-      wins: 'desc',
+      winrate: 'desc',
     },
   });
 
@@ -85,7 +95,7 @@ const NextPage = ({ session, ranking }: Props) => {
 
       <header className="flex w-full items-center justify-center h-20 fixed">
         <nav>
-          <ul className="flex gap-6 text-center">
+          <ul className="flex gap-8 text-center">
             <li>
               <button onClick={() => setRankActive((r) => !r)}>Ranking</button>
             </li>
@@ -158,7 +168,7 @@ const NextPage = ({ session, ranking }: Props) => {
         )}
 
         {rankingActive && (
-          <div className="h-screen w-screen md:w-96 text-base absolute text-center py-4 right-0 bg-indigo-200">
+          <div className="h-screen w-screen md:w-[420px] text-xs md:text-sm absolute text-center py-4 right-0 bg-indigo-200">
             <h1 className="pb-2 font-semibold">Ranking</h1>
             <div
               onClick={() => setRankActive(false)}
@@ -177,10 +187,15 @@ const NextPage = ({ session, ranking }: Props) => {
                   <div>
                     <Image src={user.avatar_url} alt="" width={47} height={47}></Image>
                   </div>
-                  <p>{user.name}</p>
-                  <p>
-                    {user.wins} wins in {user.totalRounds} rounds
-                  </p>
+                  <div className="text-left min-w-[100px]">
+                    <p>{user.name}</p>
+                  </div>
+                  <div className="text-left">
+                    <p>
+                      {user.wins} wins in {user.totalRounds} rounds
+                    </p>
+                    <p>Winrate: {user.winrate.toFixed(1)}%</p>
+                  </div>
                 </li>
               ))}
             </ul>
