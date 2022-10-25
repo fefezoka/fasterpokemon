@@ -16,6 +16,15 @@ export default async function update(req: NextApiRequest, res: NextApiResponse) 
   });
 
   await prisma.user.upsert({
+    create: {
+      email: email,
+      name: name,
+      avatar_url: image,
+      wins: rightAnswer ? 1 : 0,
+      maxStreak: streak,
+      winrate: 0,
+      totalRounds: 1,
+    },
     update: {
       wins: {
         increment: rightAnswer ? 1 : 0,
@@ -27,20 +36,11 @@ export default async function update(req: NextApiRequest, res: NextApiResponse) 
         set: user?.maxStreak ? (streak > user.maxStreak ? streak : user?.maxStreak) : 0,
       },
       winrate: {
-        set: ((user!.wins + rightAnswer) / (user!.totalRounds + 1)) * 100,
+        set: user?.wins ? ((user.wins + rightAnswer) / (user.totalRounds + 1)) * 100 : 0,
       },
     },
     where: {
       email: email,
-    },
-    create: {
-      email: email,
-      name: name,
-      avatar_url: image,
-      wins: rightAnswer ? 1 : 0,
-      maxStreak: streak,
-      winrate: 0,
-      totalRounds: 1,
     },
   });
 

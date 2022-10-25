@@ -119,7 +119,7 @@ const NextPage = ({ session, ranking }: Props) => {
         </nav>
       </header>
 
-      <main className="flex px-4 flex-col items-center justify-center h-screen">
+      <main className="flex px-4 items-center justify-center h-screen">
         <div className="absolute top-[20%] text-center">
           <h1 className="text-3xl">Which one is faster?</h1>
           {streak >= 3 && <h1 className="text-2xl">In a {streak} guess streak!!</h1>}
