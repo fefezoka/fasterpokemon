@@ -50,25 +50,16 @@ const NextPage = ({ session, ranking }: Props) => {
       return;
     }
 
-    if (options[0].speed > options[1].speed) {
-      if (chosen === 1) {
-        onRightAnswer();
-      } else {
-        setStreak(0);
-      }
-    } else {
-      if (chosen === 2) {
-        onRightAnswer();
-      } else {
-        setStreak(0);
-      }
-    }
-    setGuessed(true);
-  };
+    const faster = options[0].speed > options[1].speed ? 0 : 1;
 
-  const onRightAnswer = () => {
-    setRightAnswer(true);
-    setStreak((s) => s + 1);
+    faster === chosen
+      ? (() => {
+          setRightAnswer(true);
+          setStreak((s) => s + 1);
+        })()
+      : setStreak(0);
+
+    setGuessed(true);
   };
 
   const refreshData = () => {
@@ -96,7 +87,7 @@ const NextPage = ({ session, ranking }: Props) => {
         <nav>
           <ul className="flex gap-6 text-center">
             <li>
-              <button onClick={() => setRankActive(true)}>Ranking</button>
+              <button onClick={() => setRankActive((r) => !r)}>Ranking</button>
             </li>
             {session ? (
               <>
@@ -107,81 +98,64 @@ const NextPage = ({ session, ranking }: Props) => {
               </>
             ) : (
               <li>
-                <button onClick={() => signIn('github')}>Login with Github</button>
+                <span>Login with </span>
+                <button onClick={() => signIn('github')}>Github</button>
+                <span> or </span>
+                <button onClick={() => signIn('discord')}>Discord</button>
               </li>
             )}
           </ul>
         </nav>
       </header>
 
-      <main className="flex flex-col items-center justify-center h-screen">
+      <main className="flex px-4 flex-col items-center justify-center h-screen">
         <div className="absolute top-[20%] text-center">
           <h1 className="text-3xl">Which one is faster?</h1>
           {streak >= 3 && <h1 className="text-2xl">In a {streak} guess streak!!</h1>}
         </div>
 
-        <div className="flex w-screen justify-evenly items-center md:w-5/12">
-          {!loading ? (
-            <div className="cursor-pointer" onClick={() => whichIsFaster(1)}>
-              <Image
-                src={options[0].sprites.other['official-artwork'].front_default}
-                width="260px"
-                height="260px"
-                priority
-                alt=""
-              />
+        <div className="flex w-full justify-center gap-12 items-center lg:w-5/12">
+          {options.map((pokemon, index) =>
+            !loading ? (
+              <div
+                key={pokemon.id}
+                className="cursor-pointer"
+                onClick={() => whichIsFaster(index)}
+              >
+                <Image
+                  src={pokemon.sprites.other['official-artwork'].front_default}
+                  width="260px"
+                  height="260px"
+                  priority
+                  alt=""
+                />
 
-              <div className="text-center">
-                <span className="capitalize">{options[0].name}</span>
-                <div>
-                  Base speed:{' '}
-                  {guessed ? <span>{options[0].speed}</span> : <span>??</span>}
+                <div className="text-center">
+                  <span className="capitalize">{pokemon.name}</span>
+                  <div>
+                    Base speed: {guessed ? <span>{pokemon.speed}</span> : <span>??</span>}
+                  </div>
                 </div>
               </div>
-            </div>
-          ) : (
-            <Image src={Spinner} priority width="120px" height="120px" alt="" />
+            ) : (
+              <Image src={Spinner} priority width="120px" height="120px" alt="" />
+            )
           )}
-          <span className="text-2xl">or</span>
-
-          {!loading ? (
-            <div className="cursor-pointer" onClick={() => whichIsFaster(2)}>
-              <Image
-                src={options[1].sprites.other['official-artwork'].front_default}
-                width="260px"
-                height="260px"
-                priority
-                alt=""
-              />
-
-              <div className="text-center">
-                <span className="capitalize">{options[1].name}</span>
-                <div>
-                  Base speed:{' '}
-                  {guessed ? <span>{options[1].speed}</span> : <span>??</span>}
-                </div>
-              </div>
-            </div>
-          ) : (
-            <Image src={Spinner} priority width="120px" height="120px" alt="" />
-          )}
+          <p className="absolute text-2xl">or</p>
         </div>
-        {guessed &&
-          (rightAnswer ? (
-            <div className="absolute text-center rounded-md bg-green px-8 py-3 text-white">
-              <h2 className="text-xl">Right answer</h2>
-              <button onClick={refreshData} className="py-2 px-3 mt-3 rounded-md">
-                Continue
-              </button>
-            </div>
-          ) : (
-            <div className="absolute text-center rounded-md bg-red px-8 py-3 text-white">
-              <h2 className="text-xl">Wrong answer</h2>
-              <button onClick={refreshData} className="py-2 px-3 mt-3 rounded-md">
-                Continue
-              </button>
-            </div>
-          ))}
+
+        {guessed && (
+          <div className="absolute bottom-[12%] text-center px-8 py-3">
+            {rightAnswer ? (
+              <h2 className="text-3xl text-green">Right answer</h2>
+            ) : (
+              <h2 className="text-3xl text-red">Wrong answer</h2>
+            )}
+            <button onClick={refreshData} className="py-2 px-4 mt-3 rounded-md">
+              Continue
+            </button>
+          </div>
+        )}
 
         {rankingActive && (
           <div className="h-screen w-screen md:w-96 text-base absolute text-center py-4 right-0 bg-indigo-200">
@@ -196,7 +170,7 @@ const NextPage = ({ session, ranking }: Props) => {
             <ul>
               {ranking.map((user, index) => (
                 <li
-                  className="flex gap-4 py-9 px-4 items-center max-h-9 border-b border-black"
+                  className="flex gap-4 py-9 px-4 items-center max-h-9 border-b border-bg"
                   key={user.id}
                 >
                   <p>{index + 1}º</p>

@@ -13,8 +13,9 @@ module.exports = {
         fade: 'fade .66s ease',
       },
       colors: {
-        white: 'var(--white)',
+        bg: 'var(--bg)',
         green: 'var(--green)',
+        white: 'var(--white)',
         red: 'var(--red)',
       },
     },
