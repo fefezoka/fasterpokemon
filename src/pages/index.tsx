@@ -124,8 +124,8 @@ const NextPage = ({ session, ranking }: Props) => {
               >
                 <Image
                   src={pokemon.sprites.other['official-artwork'].front_default}
-                  width="260px"
-                  height="260px"
+                  width="220px"
+                  height="220px"
                   priority
                   alt=""
                 />
@@ -141,7 +141,7 @@ const NextPage = ({ session, ranking }: Props) => {
               <Image src={Spinner} priority width="120px" height="120px" alt="" />
             )
           )}
-          <p className="absolute text-2xl">or</p>
+          <p className="absolute text-xl">or</p>
         </div>
 
         {guessed && (
