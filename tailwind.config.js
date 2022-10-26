@@ -14,11 +14,17 @@ module.exports = {
       },
       colors: {
         bg: 'var(--bg)',
+        ranking: 'var(--ranking)',
         green: 'var(--green)',
         white: 'var(--white)',
         red: 'var(--red)',
       },
     },
   },
-  plugins: [],
+  plugins: [
+    function ({ addVariant }) {
+      addVariant('child', '& > *');
+      addVariant('child-hover', '& > *:hover');
+    },
+  ],
 };

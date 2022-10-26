@@ -7,6 +7,7 @@ const nextConfig = {
       'raw.githubusercontent.com',
       'avatars.githubusercontent.com',
       'cdn.discordapp.com',
+      'lh3.googleusercontent.com',
     ],
   },
 };

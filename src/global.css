@@ -3,8 +3,9 @@
 @tailwind utilities;
 
 :root {
-  --bg: rgb(213, 223, 255);
+  --bg: rgb(194, 200, 255);
   --white: rgb(230, 236, 242);
+  --ranking: rgb(188, 195, 254);
   --black: rgb(25, 30, 35);
   --green: rgb(0, 99, 65);
   --red: rgb(120, 20, 30);
