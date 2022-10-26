@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { api } from '../services/api';
+import { pokeapi } from '../services/pokeapi';
 import { Pokemon } from '../types/pokemon.type';
 import { getTwoPokemonIds } from '../utils/getTwoPokemonIds';
 
@@ -12,8 +12,8 @@ export const useLoadOptions = () => {
     const getOptions: () => any = async () => {
       setLoading(true);
       const [idOne, idTwo] = getTwoPokemonIds();
-      const { data: pokeOne } = await api(`${idOne}`);
-      const { data: pokeTwo } = await api(`${idTwo}`);
+      const { data: pokeOne } = await pokeapi(`${idOne}`);
+      const { data: pokeTwo } = await pokeapi(`${idTwo}`);
 
       pokeOne.speed = pokeOne.stats[5].base_stat;
       pokeTwo.speed = pokeTwo.stats[5].base_stat;

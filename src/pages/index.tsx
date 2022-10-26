@@ -5,7 +5,7 @@ import Image from 'next/image';
 import Spinner from '../../public/Spinner.svg';
 import { signIn, getSession, signOut } from 'next-auth/react';
 import { Session } from 'next-auth';
-import axios from 'axios';
+import { serverless } from '../services/serverless';
 import { useLoadOptions } from '../hooks/useLoadOptions';
 import { prisma } from '../lib/prisma';
 import { User } from '@prisma/client';
@@ -37,7 +37,7 @@ export const getServerSideProps: GetServerSideProps = async ({ req }) => {
     });
   }
 
-  const { data: ranking } = await axios.get('http://localhost:3000/api/user/ranking');
+  const { data: ranking } = await serverless.get('/api/user/ranking');
 
   return {
     props: {
@@ -80,7 +80,7 @@ const NextPage = ({ session, ranking }: Props) => {
   };
 
   const updateUserOnDB = async () => {
-    await axios.post(`/api/user/update`, {
+    await serverless.post(`/api/user/update`, {
       email: session.user?.email,
       rightAnswer: gameData.rightAnswer,
       streak: gameData.streak,
