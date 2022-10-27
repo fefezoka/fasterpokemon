@@ -10,15 +10,14 @@ interface Ranking {
 
 export const useLoadRanking = () => {
   const [ranking, setRanking] = useState<Ranking>();
-  const [update, setUpdate] = useState<number>(0);
 
   useEffect(() => {
-    const getOptions: () => any = async () => {
+    const getOptions = async () => {
       const { data } = await serverless.get('/api/user/ranking');
       setRanking(data);
     };
     getOptions();
-  }, [update]);
+  }, []);
 
-  return { ranking, setUpdate };
+  return { ranking };
 };

@@ -8,16 +8,13 @@ import { Session } from 'next-auth/core/types';
 import { serverless } from '../services/serverless';
 import { useLoadOptions } from '../hooks/useLoadOptions';
 import { prisma } from '../lib/prisma';
-import { BsX, BsArrowCounterclockwise } from 'react-icons/bs';
-import Ranking from '../components/RankingItems';
+import { Ranking } from '../components/Ranking';
 import { initialState, reducer } from '../reducers/gameReducer';
 import { useLoadRanking } from '../hooks/useLoadRanking';
 
 interface Props {
   session: Session;
 }
-
-type OrderBy = 'winrate' | 'wins' | 'maxStreak' | 'totalRounds';
 
 export const getServerSideProps: GetServerSideProps = async ({ req }) => {
   const session = await getSession({ req });
@@ -44,9 +41,8 @@ export const getServerSideProps: GetServerSideProps = async ({ req }) => {
 const NextPage = ({ session }: Props) => {
   const [gameData, dispatch] = useReducer(reducer, initialState);
   const [rankingActive, setRankingActive] = useState<boolean>();
-  const [RankingOrderby, setRankingOrderby] = useState<OrderBy>('winrate');
   const { loading, options, setRounds } = useLoadOptions();
-  const { ranking, setUpdate } = useLoadRanking();
+  const { ranking } = useLoadRanking();
 
   if (!options) {
     return;
@@ -123,7 +119,7 @@ const NextPage = ({ session }: Props) => {
           !loading ? (
             <div
               key={pokemon.id}
-              className="cursor-pointer"
+              className="cursor-pointer animate-fade"
               onClick={() => whichIsFaster(index)}
             >
               <Image
@@ -142,7 +138,7 @@ const NextPage = ({ session }: Props) => {
               </div>
             </div>
           ) : (
-            <Image src={Spinner} priority width="120px" height="120px" alt="" />
+            <Image src={Spinner} width="120px" height="120px" alt="" />
           )
         )}
         <p className="absolute text-xl">or</p>
@@ -161,39 +157,7 @@ const NextPage = ({ session }: Props) => {
         )}
 
         {rankingActive && ranking && (
-          <div
-            className="h-screen border-l border-white w-screen lg:w-[420px]
-            text-xs lg:text-sm absolute text-center py-5 right-0 bg-ranking"
-          >
-            <div className="relative">
-              <h1 className="pb-2 text-base font-semibold">Ranking</h1>
-              <button
-                onClick={() => setRankingActive(false)}
-                className="absolute p-1 right-7 -top-1 cursor-pointer"
-              >
-                <BsX size={28}></BsX>
-              </button>
-              <button
-                onClick={() => setUpdate((s) => s + 1)}
-                className="p-1 absolute left-7 top-10"
-              >
-                <BsArrowCounterclockwise size={18} />
-              </button>
-            </div>
-
-            <div
-              className="child:px-2 child:py-1 py-2 child:min-w-[60px]
-              lg:child:min-w-[90px] child:border-b-2 focus:child:border-black"
-            >
-              <button onClick={() => setRankingOrderby('winrate')}>Winrate</button>
-              <button onClick={() => setRankingOrderby('wins')}>Wins</button>
-              <button onClick={() => setRankingOrderby('maxStreak')}>Max Streak</button>
-            </div>
-
-            {RankingOrderby === 'winrate' && <Ranking ranking={ranking.winrate} />}
-            {RankingOrderby === 'wins' && <Ranking ranking={ranking.wins} />}
-            {RankingOrderby === 'maxStreak' && <Ranking ranking={ranking.maxStreak} />}
-          </div>
+          <Ranking ranking={ranking} setRankingActive={setRankingActive} />
         )}
       </main>
     </>
