@@ -111,46 +111,41 @@ const NextPage = ({ session }: Props) => {
         </nav>
       </header>
 
-      <main className="flex px-4 items-center justify-center h-screen">
+      <main className="flex px-4 items-center gap-10 justify-center h-screen">
         <div className="absolute top-[20%] text-center">
-          <h1 className="text-3xl">Which one is faster?</h1>
+          <h1 className="text-2xl lg:text-3xl">Which one is faster?</h1>
           {gameData.streak >= 3 && (
             <h1 className="text-2xl">In a {gameData.streak} guess streak!!</h1>
           )}
         </div>
 
-        <div className="flex w-full justify-evenly gap-12 items-center lg:w-1/3">
-          {options.map((pokemon, index) =>
-            !loading ? (
-              <div
-                key={pokemon.id}
-                className="cursor-pointer"
-                onClick={() => whichIsFaster(index)}
-              >
-                <Image
-                  src={pokemon.sprites.other['official-artwork'].front_default}
-                  width="220px"
-                  height="220px"
-                  placeholder="blur"
-                  blurDataURL={Spinner}
-                  quality={50}
-                  priority
-                  alt=""
-                />
-                <div className="text-center">
-                  <span className="capitalize">{pokemon.name}</span>
-                  <div>
-                    Base speed:{' '}
-                    {gameData.guessed ? <span>{pokemon.speed}</span> : <span>??</span>}
-                  </div>
+        {options.map((pokemon, index) =>
+          !loading ? (
+            <div
+              key={pokemon.id}
+              className="cursor-pointer"
+              onClick={() => whichIsFaster(index)}
+            >
+              <Image
+                src={pokemon.sprites.other['official-artwork'].front_default}
+                width="220px"
+                height="220px"
+                quality={35}
+                alt=""
+              />
+              <div className="text-center">
+                <span className="capitalize">{pokemon.name}</span>
+                <div>
+                  Base speed:{' '}
+                  {gameData.guessed ? <span>{pokemon.speed}</span> : <span>??</span>}
                 </div>
               </div>
-            ) : (
-              <Image src={Spinner} priority width="120px" height="120px" alt="" />
-            )
-          )}
-          <p className="absolute text-xl">or</p>
-        </div>
+            </div>
+          ) : (
+            <Image src={Spinner} priority width="120px" height="120px" alt="" />
+          )
+        )}
+        <p className="absolute text-xl">or</p>
 
         {gameData.guessed && (
           <div className="absolute bottom-[12%] text-center px-8 py-3">
@@ -159,7 +154,7 @@ const NextPage = ({ session }: Props) => {
             ) : (
               <h2 className="text-3xl text-red">Wrong answer</h2>
             )}
-            <button onClick={refreshData} className="py-2 px-4 mt-3 rounded-md">
+            <button onClick={refreshData} className="py-2 px-4 mt-3 rounded-lg">
               Continue
             </button>
           </div>
@@ -167,32 +162,30 @@ const NextPage = ({ session }: Props) => {
 
         {rankingActive && ranking && (
           <div
-            className="h-screen border-l border-white w-screen md:w-[420px]
-            text-xs md:text-sm absolute text-center py-4 right-0 bg-ranking"
+            className="h-screen border-l border-white w-screen lg:w-[420px]
+            text-xs lg:text-sm absolute text-center py-5 right-0 bg-ranking"
           >
             <div className="relative">
               <h1 className="pb-2 text-base font-semibold">Ranking</h1>
-              <div
+              <button
                 onClick={() => setRankingActive(false)}
                 className="absolute p-1 right-7 -top-1 cursor-pointer"
               >
                 <BsX size={28}></BsX>
-              </div>
-              <div
+              </button>
+              <button
                 onClick={() => setUpdate((s) => s + 1)}
                 className="p-1 absolute left-7 top-10"
               >
-                <BsArrowCounterclockwise size={18}></BsArrowCounterclockwise>
-              </div>
+                <BsArrowCounterclockwise size={18} />
+              </button>
             </div>
 
             <div
-              className="child:px-2 child:py-1 py-1 child:min-w-[60px]
-              md:child:min-w-[90px] child:border-b-2 focus:child:border-black"
+              className="child:px-2 child:py-1 py-2 child:min-w-[60px]
+              lg:child:min-w-[90px] child:border-b-2 focus:child:border-black"
             >
-              <button autoFocus onClick={() => setRankingOrderby('winrate')}>
-                Winrate
-              </button>
+              <button onClick={() => setRankingOrderby('winrate')}>Winrate</button>
               <button onClick={() => setRankingOrderby('wins')}>Wins</button>
               <button onClick={() => setRankingOrderby('maxStreak')}>Max Streak</button>
             </div>
