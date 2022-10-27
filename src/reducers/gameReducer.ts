@@ -8,7 +8,7 @@ interface Action {
   type: 'right' | 'wrong' | 'reset';
 }
 
-export const initialState = {
+export const initialState: State = {
   guessed: false,
   rightAnswer: false,
   streak: 0,

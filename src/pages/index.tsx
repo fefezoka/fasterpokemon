@@ -8,19 +8,16 @@ import { Session } from 'next-auth';
 import { serverless } from '../services/serverless';
 import { useLoadOptions } from '../hooks/useLoadOptions';
 import { prisma } from '../lib/prisma';
-import { User } from '@prisma/client';
-import { BsX } from 'react-icons/bs';
+import { BsX, BsArrowCounterclockwise } from 'react-icons/bs';
 import Ranking from '../components/RankingItems';
 import { initialState, reducer } from '../reducers/gameReducer';
+import { useLoadRanking } from '../hooks/useLoadRanking';
 
 interface Props {
   session: Session;
-  ranking: {
-    winrate: User[];
-    wins: User[];
-    maxStreak: User[];
-  };
 }
+
+type OrderBy = 'winrate' | 'wins' | 'maxStreak' | 'totalRounds';
 
 export const getServerSideProps: GetServerSideProps = async ({ req }) => {
   const session = await getSession({ req });
@@ -37,23 +34,19 @@ export const getServerSideProps: GetServerSideProps = async ({ req }) => {
     });
   }
 
-  const { data: ranking } = await serverless.get('/api/user/ranking');
-
   return {
     props: {
       session,
-      ranking,
     },
   };
 };
 
-const NextPage = ({ session, ranking }: Props) => {
+const NextPage = ({ session }: Props) => {
   const [gameData, dispatch] = useReducer(reducer, initialState);
   const [rankingActive, setRankingActive] = useState<boolean>();
-  const [RankingOrderby, setRankingOrderby] = useState<
-    'winrate' | 'wins' | 'maxStreak' | 'totalRounds'
-  >('winrate');
+  const [RankingOrderby, setRankingOrderby] = useState<OrderBy>('winrate');
   const { loading, options, setRounds } = useLoadOptions();
+  const { ranking, setUpdate } = useLoadRanking();
 
   if (!options) {
     return;
@@ -172,7 +165,7 @@ const NextPage = ({ session, ranking }: Props) => {
           </div>
         )}
 
-        {rankingActive && (
+        {rankingActive && ranking && (
           <div
             className="h-screen border-l border-white w-screen md:w-[420px]
             text-xs md:text-sm absolute text-center py-4 right-0 bg-ranking"
@@ -181,9 +174,15 @@ const NextPage = ({ session, ranking }: Props) => {
               <h1 className="pb-2 text-base font-semibold">Ranking</h1>
               <div
                 onClick={() => setRankingActive(false)}
-                className="absolute p-1 right-6 -top-1 cursor-pointer"
+                className="absolute p-1 right-7 -top-1 cursor-pointer"
               >
                 <BsX size={28}></BsX>
+              </div>
+              <div
+                onClick={() => setUpdate((s) => s + 1)}
+                className="p-1 absolute left-7 top-10"
+              >
+                <BsArrowCounterclockwise size={18}></BsArrowCounterclockwise>
               </div>
             </div>
 
@@ -191,7 +190,9 @@ const NextPage = ({ session, ranking }: Props) => {
               className="child:px-2 child:py-1 py-1 child:min-w-[60px]
               md:child:min-w-[90px] child:border-b-2 focus:child:border-black"
             >
-              <button onClick={() => setRankingOrderby('winrate')}>Winrate</button>
+              <button autoFocus onClick={() => setRankingOrderby('winrate')}>
+                Winrate
+              </button>
               <button onClick={() => setRankingOrderby('wins')}>Wins</button>
               <button onClick={() => setRankingOrderby('maxStreak')}>Max Streak</button>
             </div>
