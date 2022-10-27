@@ -4,7 +4,7 @@ import Head from 'next/head';
 import Image from 'next/image';
 import Spinner from '../../public/Spinner.svg';
 import { signIn, getSession, signOut } from 'next-auth/react';
-import { Session } from 'next-auth';
+import { Session } from 'next-auth/core/types';
 import { serverless } from '../services/serverless';
 import { useLoadOptions } from '../hooks/useLoadOptions';
 import { prisma } from '../lib/prisma';
