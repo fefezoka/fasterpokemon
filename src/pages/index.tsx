@@ -1,16 +1,17 @@
 import { useReducer, useState } from 'react';
-import type { GetServerSideProps, NextPage } from 'next';
+import type { GetServerSideProps } from 'next';
 import Head from 'next/head';
 import Image from 'next/image';
-import Spinner from '../../public/Spinner.svg';
+import Spinner from '../assets/Spinner.svg';
 import { signIn, getSession, signOut } from 'next-auth/react';
 import { Session } from 'next-auth/core/types';
 import { serverless } from '../services/serverless';
-import { useLoadOptions } from '../hooks/useLoadOptions';
 import { prisma } from '../lib/prisma';
 import { Ranking } from '../components/Ranking';
 import { initialState, reducer } from '../reducers/gameReducer';
-import { useLoadRanking } from '../hooks/useLoadRanking';
+import { useQuery } from 'react-query';
+import { getTwoPokemonIds } from '../utils/getTwoPokemonIds';
+import axios from 'axios';
 
 interface Props {
   session: Session;
@@ -38,11 +39,33 @@ export const getServerSideProps: GetServerSideProps = async ({ req }) => {
   };
 };
 
-const NextPage = ({ session }: Props) => {
+const Home = ({ session }: Props) => {
   const [gameData, dispatch] = useReducer(reducer, initialState);
   const [rankingActive, setRankingActive] = useState<boolean>();
-  const { loading, options, setRounds } = useLoadOptions();
-  const { ranking } = useLoadRanking();
+
+  const { data: options, refetch } = useQuery<Pokemon[]>(
+    'options',
+    async () => {
+      const [pokeOne, pokeTwo] = await Promise.all(
+        getTwoPokemonIds().map(async (id) => {
+          const { data } = await axios.get(`https://pokeapi.co/api/v2/pokemon/${id}`);
+          return data;
+        })
+      );
+      pokeOne.speed = pokeOne.stats[5].base_stat;
+      pokeTwo.speed = pokeTwo.stats[5].base_stat;
+
+      return [pokeOne, pokeTwo];
+    },
+    {
+      onSuccess: (pokemons) => {
+        if (pokemons[0].speed === pokemons[1].speed) {
+          refetch();
+        }
+      },
+      staleTime: Infinity,
+    }
+  );
 
   if (!options) {
     return;
@@ -65,7 +88,7 @@ const NextPage = ({ session }: Props) => {
   const refreshData = () => {
     session && updateUserOnDB();
     dispatch({ type: 'reset' });
-    setRounds((r) => r + 1);
+    refetch();
   };
 
   const updateUserOnDB = async () => {
@@ -82,14 +105,25 @@ const NextPage = ({ session }: Props) => {
         <title>Faster Pokémon</title>
       </Head>
 
-      <header className="flex w-full items-center justify-center h-20 fixed">
+      <header className="flex w-full items-center justify-center h-20 fixed border">
         <nav>
-          <ul className="flex gap-8 text-center">
+          <ul className="flex gap-12 text-center">
+            <li>
+              <button onClick={() => setRankingActive((r) => !r)}>Ranking</button>
+            </li>
             {session ? (
               <>
-                <li>
-                  <p>Logged as {session.user?.name}</p>
-                  <button onClick={() => signOut()}>Sign up</button>
+                <li className="flex justify-center items-center gap-2">
+                  <div className="overflow-hidden rounded-full h-8 w-8">
+                    <Image
+                      src={session.user?.image as string}
+                      height={32}
+                      width={32}
+                      alt=""
+                    />
+                  </div>
+                  <p>{session.user?.name}</p>
+                  <button onClick={() => signOut()}>Sign out</button>
                 </li>
               </>
             ) : (
@@ -100,9 +134,6 @@ const NextPage = ({ session }: Props) => {
                 <button onClick={() => signIn('discord')}>Discord</button>
               </li>
             )}
-            <li>
-              <button onClick={() => setRankingActive((r) => !r)}>Ranking</button>
-            </li>
           </ul>
         </nav>
       </header>
@@ -115,32 +146,29 @@ const NextPage = ({ session }: Props) => {
           )}
         </div>
 
-        {options.map((pokemon, index) =>
-          !loading ? (
-            <div
-              key={pokemon.id}
-              className="cursor-pointer animate-fade"
-              onClick={() => whichIsFaster(index)}
-            >
-              <Image
-                src={pokemon.sprites.other['official-artwork'].front_default}
-                width="220px"
-                height="220px"
-                quality={35}
-                alt=""
-              />
-              <div className="text-center">
-                <span className="capitalize">{pokemon.name}</span>
-                <div>
-                  Base speed:{' '}
-                  {gameData.guessed ? <span>{pokemon.speed}</span> : <span>??</span>}
-                </div>
+        {options.map((pokemon, index) => (
+          <div
+            key={pokemon.id}
+            className="cursor-pointer animate-fade drop-shadow-2xl"
+            onClick={() => whichIsFaster(index)}
+          >
+            <Image
+              src={pokemon.sprites.other['official-artwork'].front_default}
+              width="220px"
+              height="220px"
+              quality={35}
+              alt=""
+            />
+
+            <div className="text-center">
+              <span className="capitalize">{pokemon.name}</span>
+              <div>
+                Base speed:{' '}
+                {gameData.guessed ? <span>{pokemon.speed}</span> : <span>??</span>}
               </div>
             </div>
-          ) : (
-            <Image src={Spinner} width="120px" height="120px" alt="" />
-          )
-        )}
+          </div>
+        ))}
         <p className="absolute text-xl">or</p>
 
         {gameData.guessed && (
@@ -156,12 +184,10 @@ const NextPage = ({ session }: Props) => {
           </div>
         )}
 
-        {rankingActive && ranking && (
-          <Ranking ranking={ranking} setRankingActive={setRankingActive} />
-        )}
+        {rankingActive && <Ranking setRankingActive={setRankingActive} />}
       </main>
     </>
   );
 };
 
-export default NextPage;
+export default Home;

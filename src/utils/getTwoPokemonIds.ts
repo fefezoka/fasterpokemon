@@ -1,7 +1,7 @@
-const MAX_POKEMON_ID = 905;
+const MAX_POKEMONS = 905;
 
 const getRandomPokemon: (idToCompare?: number) => number = (idToCompare) => {
-  const id = Math.floor(Math.random() * MAX_POKEMON_ID) + 1;
+  const id = Math.floor(Math.random() * MAX_POKEMONS) + 1;
 
   if (id !== idToCompare) return id;
 

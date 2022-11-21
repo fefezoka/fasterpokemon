@@ -1,21 +1,38 @@
-import { User } from '@prisma/client';
+import axios from 'axios';
 import React, { useState } from 'react';
 import { BsArrowCounterclockwise, BsX } from 'react-icons/bs';
-import RankingItems from './RankingItems';
+import { useQuery } from 'react-query';
+import { RankingItems } from './RankingItems';
+import Spinner from '../assets/Spinner.svg';
+import Image from 'next/image';
 
 interface Props {
   setRankingActive: React.Dispatch<React.SetStateAction<boolean | undefined>>;
-  ranking: {
-    winrate: User[];
-    wins: User[];
-    maxStreak: User[];
-  };
 }
 
 type OrderBy = 'winrate' | 'wins' | 'maxStreak' | 'totalRounds';
 
-export const Ranking = ({ ranking, setRankingActive }: Props) => {
+export const Ranking = ({ setRankingActive }: Props) => {
   const [RankingOrderby, setRankingOrderby] = useState<OrderBy>('winrate');
+
+  const {
+    data: ranking,
+    isLoading,
+    refetch,
+  } = useQuery<Ranking>(
+    'ranking',
+    async () => {
+      const { data } = await axios.get('/api/user/ranking');
+      return data;
+    },
+    {
+      staleTime: Infinity,
+    }
+  );
+
+  if (!ranking) {
+    return <></>;
+  }
 
   return (
     <div
@@ -28,7 +45,10 @@ export const Ranking = ({ ranking, setRankingActive }: Props) => {
           onClick={() => setRankingActive(false)}
           className="absolute p-1 right-7 -top-1 cursor-pointer"
         >
-          <BsX size={28}></BsX>
+          <BsX size={28} />
+        </button>
+        <button className="p-1 absolute left-7 top-10" onClick={() => refetch()}>
+          <BsArrowCounterclockwise size={18} />
         </button>
       </div>
 
@@ -43,9 +63,15 @@ export const Ranking = ({ ranking, setRankingActive }: Props) => {
         <button onClick={() => setRankingOrderby('maxStreak')}>Max Streak</button>
       </div>
 
-      {RankingOrderby === 'winrate' && <RankingItems ranking={ranking.winrate} />}
-      {RankingOrderby === 'wins' && <RankingItems ranking={ranking.wins} />}
-      {RankingOrderby === 'maxStreak' && <RankingItems ranking={ranking.maxStreak} />}
+      {isLoading ? (
+        <Image src={Spinner} width={64} height={64} alt="" />
+      ) : (
+        <>
+          {RankingOrderby === 'winrate' && <RankingItems ranking={ranking.winrate} />}
+          {RankingOrderby === 'wins' && <RankingItems ranking={ranking.wins} />}
+          {RankingOrderby === 'maxStreak' && <RankingItems ranking={ranking.maxStreak} />}
+        </>
+      )}
     </div>
   );
 };

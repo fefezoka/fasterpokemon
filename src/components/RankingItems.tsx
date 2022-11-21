@@ -1,13 +1,11 @@
-import { User } from '@prisma/client';
 import Image from 'next/image';
 import React, { memo } from 'react';
-Image;
 
 interface Props {
   ranking: User[];
 }
 
-const RankingItems = ({ ranking }: Props) => {
+export const RankingItems = memo(({ ranking }: Props) => {
   return (
     <ul>
       {ranking.map((user, index) => (
@@ -18,7 +16,7 @@ const RankingItems = ({ ranking }: Props) => {
           <div className="flex items-center gap-3 min-w-[58%]">
             <p>{index + 1}º</p>
             <div className="border-2 border-white w-12 h-12">
-              <Image src={user.avatar_url} alt="" height={48} width={48}></Image>
+              <Image src={user.avatar_url} alt="" height={48} width={48} />
             </div>
             <div className="text-left">
               <p>{user.name}</p>
@@ -35,6 +33,6 @@ const RankingItems = ({ ranking }: Props) => {
       ))}
     </ul>
   );
-};
+});
 
-export default memo(RankingItems);
+RankingItems.displayName = 'RankingItems';
